@@ -3,25 +3,26 @@ from dataclasses import dataclass
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv()  # Load environment variables from .env file
 
 @dataclass
 class Settings:
-    PROVIDER: str = os.getenv("PROVIDER", "openai").lower()
+    PROVIDER: str = os.getenv("PROVIDER", "openai")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
-    SERPAPI_API_KEY: str = os.getenv("SERPAPI_API_KEY", "")
+    
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
     EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
-    LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-4o-mini")
-    LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", "0.05"))
-    CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "800"))
-    CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "100"))
+    LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", "0.7"))
+    
+    CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "1000"))
+    CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "200"))
 
 settings = Settings()
 
 def validate_for_provider():
-    p = settings.PROVIDER
+    p = settings.PROVIDER.lower()
     if p == "openai" and not settings.OPENAI_API_KEY:
         raise RuntimeError("OPENAI_API_KEY is required when PROVIDER=openai")
     if p == "groq" and not settings.GROQ_API_KEY:
