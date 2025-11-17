@@ -3,7 +3,7 @@ import streamlit as st
 from groq import Groq
 
 def get_chat_model():
-    api_key = st.secrets.get("GROQ_API_KEY")
+    api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
     if not api_key:
         return lambda prompt: "Dummy LLM response (no API key provided)."
@@ -16,6 +16,6 @@ def get_chat_model():
             messages=[{"role": "user", "content": prompt}],
             max_tokens=300
         )
-        return response.choices[0].message["content"]
+        return response.choices[0].message.content   # << FIXED
 
     return chat
