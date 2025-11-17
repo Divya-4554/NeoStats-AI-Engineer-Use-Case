@@ -1,87 +1,36 @@
 import streamlit as st
-from models.embeddings import get_embeddings
 from models.llm import get_chat_model
-from utils.retrieve import retrieve_docs
-from utils.web_search import web_search
+from model.embeddings import get_vector_store
 
-# --------------------------------------------------
-# APP TITLE
-# --------------------------------------------------
+# Initialize LLM and Vector Store
+chat_model = get_chat_model()
+vector_store = get_vector_store()
+
 st.title("NeoStats AI Engineer Assistant")
 
-# --------------------------------------------------
-# Initialize Chat History
-# --------------------------------------------------
-if "history" not in st.session_state:
-    st.session_state.history = []
+response_mode = st.radio("Response Mode", ["Concise", "Detailed"])
+user_query = st.text_input("Enter your question:")
 
-# --------------------------------------------------
-# Dummy Local RAG Documents
-# --------------------------------------------------
-docs = [
-    "NeoStats provides AI-powered analytics for IT and engineering teams.",
-    "Streamlit allows fast deployment of AI, ML, and data applications.",
-    "RAG integrates local documents with LLMs to provide contextual answers."
-]
+chat_history = st.session_state.get("chat_history", [])
 
-# Precompute embeddings
-doc_embeddings = get_embeddings(docs)
+if user_query:
+    # Embed Query & Search
+    docs = vector_store.similarity_search(user_query, k=2)
 
-# --------------------------------------------------
-# UI Controls
-# --------------------------------------------------
-mode = st.radio("Response Mode", ["Concise", "Detailed"])
-query = st.text_input("Enter your question:")
+    # Prepare context
+    context = "\n".join([d.page_content for d in docs]) if docs else "No relevant document found."
 
-# Load Dummy LLM
-llm = get_chat_model()
+    prompt = f"Response Mode: {response_mode}.\nUser Query: {user_query}.\nContext: {context}.\nAnswer:"    
 
-# --------------------------------------------------
-# Clear Chat Button
-# --------------------------------------------------
-if st.button("Clear Chat"):
-    st.session_state.history = []
-    st.experimental_rerun()
+    # LLM Response
+    answer = chat_model.predict(prompt)
 
-# --------------------------------------------------
-# Ask Button Logic
-# --------------------------------------------------
-if st.button("Ask"):
+    # Save to history
+    chat_history.append(("You", user_query))
+    chat_history.append(("Assistant", answer))
+    st.session_state.chat_history = chat_history
 
-    if not query.strip():
-        st.warning("Please enter a question.")
-        st.stop()
-
-    try:
-        # Step 1: RAG Retrieval
-        top_docs = retrieve_docs(query, docs, doc_embeddings)
-
-        if top_docs:
-            context = "\n".join(top_docs)
-        else:
-            # Step 2: Fallback to Web Search
-            web_results = web_search(query)
-            context = "\n".join(web_results) if web_results else "No relevant information found."
-
-        # Step 3: LLM Response
-        prompt = f"User Query: {query}\nContext:\n{context}"
-        final_response = llm(prompt, mode)
-
-        # Store in chat history
-        st.session_state.history.append({"user": query, "bot": final_response})
-
-    except Exception as e:
-        st.error(f"Something went wrong: {e}")
-
-# --------------------------------------------------
-# Chat History Display
-# --------------------------------------------------
+# Display chat history
 st.subheader("Chat History")
-
-if st.session_state.history:
-    for chat in st.session_state.history:
-        st.markdown(f"**You:** {chat['user']}")
-        st.markdown(f"**Assistant:** {chat['bot']}")
-        st.markdown("---")
-else:
-    st.write("Start asking questions to build chat history.")
+for speaker, msg in chat_history:
+    st.write(f"**{speaker}:** {msg}")
