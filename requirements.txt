@@ -1,23 +1,19 @@
-# Streamlit UI
+# Core
 streamlit==1.26.0
-
-# Environment & Requests
 python-dotenv==1.0.1
 requests==2.31.0
 
-# PDF & PPT support
+# PDF & PPT
 PyPDF2==3.1.1
 python-pptx==0.6.21
 
-# LangChain & LLM support
+# LangChain & OpenAI
 langchain==0.1.95
 openai==0.27.9
 
 # Vector store
 faiss-cpu==1.7.4
 
-# Optional providers (if using Groq or Google)
+# Optional providers (if needed)
 langchain-groq==0.0.21
 langchain-google-genai==0.0.15
-
-
