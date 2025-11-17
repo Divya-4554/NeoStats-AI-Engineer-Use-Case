@@ -3,16 +3,18 @@ from models.embeddings import get_embeddings
 from utils.retrieve import retrieve_docs
 from utils.web_search import web_search
 
+st.set_page_config(page_title="NeoStats AI Engineer Assistant", layout="centered")
 st.title("NeoStats AI Engineer Assistant")
 
-# Dummy local documents
+# ---------- Local documents ----------
+# Replace these with real .txt files loaded dynamically if you want later.
 docs = [
     "NeoStats provides AI-powered analytics for IT and engineering teams.",
     "Streamlit allows fast deployment of AI, ML, and data applications.",
     "RAG integrates local documents with LLMs to provide contextual answers."
 ]
 
-# Precompute dummy embeddings
+# Compute dummy embeddings once (no external API required)
 doc_embeddings = get_embeddings(docs)
 
 # UI
@@ -22,47 +24,47 @@ query = st.text_input("Enter your question:")
 def generate_answer(query, context, mode):
     """
     Clean Answer Generator — NO API required.
+    Provides small-talk handling and concise/detailed outputs using context.
     """
-
-    # 1. Handle greetings / casual messages
-    smalltalk = ["hi", "hello", "hey", "hii", "yo", "hola"]
-    if query.lower().strip() in smalltalk:
+    # small-talk
+    if query and query.lower().strip() in ["hi", "hello", "hey", "hii", "hola", "yo"]:
         return "Hi! How can I help you today? 😊"
 
-    # 2. If nothing found at all
+    # nothing found
     if not context or context.strip() == "":
-        return "I couldn't find any relevant information. Please try another question."
+        return "I couldn't find any relevant information. Try a different question or upload documents."
 
-    # 3. Concise Mode
+    # concise
     if mode == "Concise":
-        return f"{context[:250]}..."
+        # Prefer an actual short answer derived from the most relevant sentence(s)
+        snippet = context.strip().replace("\n", " ")
+        return snippet[:250] + ("..." if len(snippet) > 250 else "")
 
-    # 4. Detailed Mode
+    # detailed
     return (
-        f"### Detailed Answer\n"
-        f"**Your Question:** {query}\n\n"
-        f"**Relevant Information Found:**\n{context}\n\n"
-        f"**Explanation:**\n"
-        f"This answer is generated using a simple RAG pipeline. "
-        f"Relevant documents (or fallback web search results) "
-        f"were used to form the final response."
+        f"### Detailed Answer\n\n"
+        f"**Question:** {query}\n\n"
+        f"**Relevant Information Used:**\n{context}\n\n"
+        f"**Explanation:**\nThis response was generated using a retrieval-augmented pipeline: the app retrieved relevant documents (or web results) and used them as context to form this answer."
     )
 
 
 if st.button("Ask"):
     try:
-        # Retrieve top docs using embeddings
-        top_docs = retrieve_docs(query, docs, doc_embeddings)
-
-        if top_docs:
-            context = "\n".join(top_docs)
+        if not query or query.strip() == "":
+            st.warning("Please enter a question.")
         else:
-            # If local docs fail → fallback to dummy web search
-            web_results = web_search(query)
-            context = "\n".join(web_results)
+            # Retrieve local documents (RAG)
+            top_docs = retrieve_docs(query, docs, doc_embeddings, top_k=3, similarity_threshold=0.35)
 
-        final_answer = generate_answer(query, context, mode)
-        st.write(final_answer)
+            if top_docs:
+                context = "\n\n".join(top_docs)
+            else:
+                # Fallback to mock web search
+                web_results = web_search(query)
+                context = "\n\n".join(web_results)
 
+            final_answer = generate_answer(query, context, mode)
+            st.markdown(final_answer)
     except Exception as e:
         st.error(f"Something went wrong: {e}")
