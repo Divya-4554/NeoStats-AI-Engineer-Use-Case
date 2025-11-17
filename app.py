@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 from models.embeddings import get_embeddings
 from utils.retrieve import retrieve_docs
@@ -8,41 +7,50 @@ st.title("NeoStats AI Engineer Assistant")
 
 # Dummy local documents
 docs = [
-    "NeoStats provides AI-powered analytics for IT teams.",
-    "Streamlit allows fast deployment of ML and AI apps.",
-    "RAG integrates local documents with LLMs for better responses."
+    "NeoStats provides AI-powered analytics for IT and engineering teams.",
+    "Streamlit allows fast deployment of AI, ML, and data applications.",
+    "RAG integrates local documents with LLMs to provide contextual answers."
 ]
 
-# Compute dummy embeddings
+# Compute dummy embeddings once
 doc_embeddings = get_embeddings(docs)
 
-# Response mode
+# UI
 mode = st.radio("Response Mode", ["Concise", "Detailed"])
-
-# User input
 query = st.text_input("Enter your question:")
+
+def generate_answer(query, context, mode):
+    """Dummy LLM-style answer (no API needed)."""
+    if mode == "Concise":
+        return (
+            f"Short Answer:\n{context[:150]}...\n\n"
+            f"(Concise Mode)"
+        )
+    else:
+        return (
+            f"Detailed Answer\n\n"
+            f"User Query: {query}\n\n"
+            f"Relevant Information:\n{context}\n\n"
+            f"Explanation:\n"
+            f"This answer is generated using a RAG pipeline where retrieved documents "
+            f"or web search results are used as context.\n\n"
+            f"(Detailed Mode)"
+        )
 
 if st.button("Ask"):
     try:
-        # Retrieve relevant docs
+        # RAG Retrieval
         top_docs = retrieve_docs(query, docs, doc_embeddings)
 
         if top_docs:
             context = "\n".join(top_docs)
-            response = f"Based on retrieved documents:\n{context}"
         else:
-            # Fallback to mock web search
+            # Web Search Fallback
             web_results = web_search(query)
             context = "\n".join(web_results)
-            response = f"Based on web search results:\n{context}"
 
-        # Adjust response based on mode
-        if mode == "Concise":
-            response += "\n\n[Concise Answer Mode]"
-        else:
-            response += "\n\n[Detailed Answer Mode]"
-
-        st.write(response)
+        final_response = generate_answer(query, context, mode)
+        st.write(final_response)
 
     except Exception as e:
         st.error(f"Something went wrong: {e}")
