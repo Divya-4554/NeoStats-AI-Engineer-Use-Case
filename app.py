@@ -2,7 +2,7 @@
 
 import sys
 import os
-sys.path.insert(0, os.path.dirname(__file__))  # ensures repo root is in Python path
+sys.path.insert(0, os.path.dirname(__file__))  # Ensure repo root is in Python path
 
 import streamlit as st
 from models.llm import get_chat_model
@@ -14,20 +14,17 @@ st.set_page_config(page_title="NeoStats AI Assistant", layout="wide")
 st.title("NeoStats AI Engineer Assistant")
 st.write("Ask questions about your system/network/data, and the AI assistant will respond.")
 
-# Initialize chat history in session state
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Display previous messages
 for msg in st.session_state.messages:
-    role = msg["role"]
-    content = msg["content"]
-    with st.chat_message(role):
-        st.markdown(content)
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
 # User input
 if prompt := st.chat_input("Enter your question:"):
-    # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -39,10 +36,9 @@ if prompt := st.chat_input("Enter your question:"):
             embeddings_model = embeddings()  # call alias function
             answer = run_rag_pipeline(prompt, chat_model, embeddings_model)
             st.markdown(answer)
-            # Add AI response to chat history
             st.session_state.messages.append({"role": "assistant", "content": answer})
 
-# Sidebar for clearing chat
+# Sidebar to clear chat
 with st.sidebar:
     st.title("Navigation")
     if st.button("🗑️ Clear Chat History"):
