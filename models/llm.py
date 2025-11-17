@@ -1,33 +1,21 @@
-"""
-LLM Loader — returns Groq LLM if key exists, else returns dummy.
-"""
-
 import os
-
-try:
-    from groq import Groq
-except:
-    Groq = None
-
+import streamlit as st
+from groq import Groq
 
 def get_chat_model():
-    api_key = os.getenv("GROQ_API_KEY")
+    api_key = st.secrets.get("GROQ_API_KEY")
 
-    if api_key and Groq:
-        client = Groq(api_key=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)
+    if not api_key:
+        return lambda prompt: "Dummy LLM response (no API key provided)."
 
-        def chat(prompt):
-            response = client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=300
-            )
-            return response.choices[0].message["content"]
+    client = Groq(api_key=api_key)
 
-        return chat
+    def chat(prompt):
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=300
+        )
+        return response.choices[0].message["content"]
 
-    # Dummy fallback
-    def dummy(prompt):
-        return "Dummy LLM response (no API key provided)."
-
-    return dummy
+    return chat
