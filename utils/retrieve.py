@@ -1,19 +1,32 @@
 # utils/retrieve.py
-from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
+def cosine_similarity_manual(a, b):
+    """Manual cosine similarity without sklearn."""
+    a = np.array(a, dtype=float)
+    b = np.array(b, dtype=float)
+
+    if np.linalg.norm(a) == 0 or np.linalg.norm(b) == 0:
+        return 0.0
+
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+
 def retrieve_docs(query, docs, doc_embeddings, top_k=3):
-    """
-    Retrieve top_k most relevant documents to a query using dummy embeddings.
-    """
+    """Retrieve most relevant documents using manual cosine similarity."""
     try:
-        # Convert query to dummy embedding
-        query_embedding = [sum(ord(c) for c in query)]
-        # Compute cosine similarity
-        sims = cosine_similarity([query_embedding], doc_embeddings)[0]
-        top_indices = sims.argsort()[-top_k:][::-1]
+        query_emb = [sum(ord(c) for c in query) * len(query)]
+
+        similarities = [
+            cosine_similarity_manual(query_emb, emb)
+            for emb in doc_embeddings
+        ]
+
+        top_indices = np.argsort(similarities)[-top_k:][::-1]
+
         top_docs = [docs[i] for i in top_indices]
         return top_docs
+
     except Exception as e:
-        print(f"Error in retrieve_docs: {e}")
+        print("Error in retrieve_docs:", e)
         return []
