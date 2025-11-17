@@ -1,7 +1,11 @@
+
 import streamlit as st
-from models.llm import get_chat_model
-from models.embeddings import get_vector_store
-from utils.rag_pipeline import rag_answer
+from models.embeddings import get_embeddings
+from utils.retrieve import retrieve_docs
+from utils.web_search import web_searchimport streamlit as st
+from models.embeddings import get_embeddings
+from utils.retrieve import retrieve_docs
+from utils.web_search import web_search
 
 # -----------------------------
 # PAGE CONFIG
@@ -74,4 +78,5 @@ if query:
     # display bot message
     with st.chat_message("assistant"):
         st.markdown(answer)
+
 
