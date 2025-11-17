@@ -1,6 +1,6 @@
 import streamlit as st
 from models.llm import get_chat_model
-from model.embeddings import get_vector_store
+from models.embeddings import get_vector_store
 from utils.rag_pipeline import rag_answer
 
 # -----------------------------
@@ -74,3 +74,4 @@ if query:
     # display bot message
     with st.chat_message("assistant"):
         st.markdown(answer)
+
