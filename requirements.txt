@@ -5,3 +5,5 @@ faiss-cpu
 
 scikit-learn
 numpy
+groq
+
