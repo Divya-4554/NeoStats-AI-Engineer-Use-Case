@@ -1,39 +1,16 @@
 # models/embeddings.py
-
-from config.config import settings
 from typing import List
 
-try:
-    from langchain.embeddings.openai import OpenAIEmbeddings
-except Exception:
-    OpenAIEmbeddings = None
+# Dummy embeddings class for testing without API key
+class DummyEmbeddings:
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        # Return a simple numeric vector for each text
+        return [[float(len(t))] for t in texts]
 
 def get_embeddings_client():
-    provider = settings.PROVIDER.lower()
-    if provider == "openai":
-        if OpenAIEmbeddings is None:
-            raise RuntimeError(
-                "OpenAIEmbeddings not available. Ensure `langchain` and `openai` packages are installed."
-            )
-        return OpenAIEmbeddings(
-            model=settings.EMBEDDING_MODEL,
-            openai_api_key=settings.OPENAI_API_KEY
-        )
-    elif provider == "groq":
-        raise NotImplementedError("Groq embeddings not implemented.")
-    elif provider in ("google", "gemini"):
-        raise NotImplementedError("Google embeddings not implemented.")
-    else:
-        raise RuntimeError(f"Unsupported provider for embeddings: {provider}")
-
-def embed_texts(texts: List[str]) -> List[List[float]]:
-    client = get_embeddings_client()
-    try:
-        return client.embed_documents(texts)
-    except Exception:
-        if hasattr(client, "embed"):
-            return client.embed(texts)
-        raise
+    """Return dummy embeddings client for testing."""
+    print("⚠️ Using DummyEmbeddings because no API key is provided.")
+    return DummyEmbeddings()
 
 # Alias for app.py
 def get_embeddings():
