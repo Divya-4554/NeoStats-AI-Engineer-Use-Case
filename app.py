@@ -1,79 +1,65 @@
-
 import streamlit as st
+
 from models.embeddings import get_embeddings
+from models.llm import get_chat_model
 from utils.retrieve import retrieve_docs
 from utils.web_search import web_search
-# -----------------------------
-# PAGE CONFIG
-# -----------------------------
-st.set_page_config(page_title="NeoStats AI Engineer Assistant", layout="wide")
 
-# -----------------------------
-# INIT SESSION STATE
-# -----------------------------
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+# --------------------------------------------------
+# Page Title
+# --------------------------------------------------
+st.title("NeoStats AI Engineer Assistant")
 
-if "mode" not in st.session_state:
-    st.session_state.mode = "Concise"
+# --------------------------------------------------
+# Local Dummy Documents (RAG Corpus)
+# --------------------------------------------------
+docs = [
+    "NeoStats provides AI-powered analytics for IT and engineering teams.",
+    "Streamlit allows fast deployment of AI, ML, and data applications.",
+    "RAG integrates local documents with LLMs to provide contextual answers."
+]
 
-# -----------------------------
-# HEADER
-# -----------------------------
-st.title("🤖 NeoStats AI Engineer Assistant")
+# Compute embeddings once
+doc_embeddings = get_embeddings(docs)
 
-# -----------------------------
-# RESPONSE MODE TOGGLE
-# -----------------------------
-col1, col2 = st.columns([4, 2])
-with col2:
-    st.session_state.mode = st.radio(
-        "Response Mode",
-        ["Concise", "Detailed"],
-        horizontal=True
-    )
+# --------------------------------------------------
+# UI Elements
+# --------------------------------------------------
+mode = st.radio("Response Mode", ["Concise", "Detailed"])
+query = st.text_input("Enter your question:")
 
-# -----------------------------
-# CLEAR CHAT HISTORY
-# -----------------------------
-if st.button("🗑️ Clear Chat History"):
-    st.session_state.messages = []
-    st.experimental_rerun()
+# Load Dummy LLM Model (from models/llm.py)
+llm = get_chat_model()
 
-# -----------------------------
-# CHAT DISPLAY AREA
-# -----------------------------
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
+# --------------------------------------------------
+# Ask Button Logic
+# --------------------------------------------------
+if st.button("Ask"):
 
-# -----------------------------
-# USER INPUT BOX (ChatGPT Style)
-# -----------------------------
-query = st.chat_input("Enter your question...")
+    if not query.strip():
+        st.warning("Please enter a question.")
+        st.stop()
 
-# -----------------------------
-# PROCESS USER INPUT
-# -----------------------------
-if query:
-    # append user message
-    st.session_state.messages.append({"role": "user", "content": query})
-    with st.chat_message("user"):
-        st.markdown(query)
+    try:
+        # Step 1: Retrieve relevant local documents (RAG)
+        top_docs = retrieve_docs(query, docs, doc_embeddings)
 
-    # Load model + vector store
-    llm = get_chat_model()
-    vector_store = get_vector_store()
+        if top_docs:
+            context = "\n".join(top_docs)
+        else:
+            # Step 2: Fallback → Web Search Tool
+            web_results = web_search(query)
+            if web_results:
+                context = "\n".join(web_results)
+            else:
+                context = "No relevant document or web result found."
 
-    # Generate RAG response
-    answer = rag_answer(query, llm=llm, vector_store=vector_store, mode=st.session_state.mode)
+        # Step 3: LLM generates final response
+        prompt = f"User Query: {query}\nContext:\n{context}"
+        final_response = llm(prompt, mode)
 
-    # append bot message
-    st.session_state.messages.append({"role": "assistant", "content": answer})
+        # Output
+        st.write(final_response)
 
-    # display bot message
-    with st.chat_message("assistant"):
-        st.markdown(answer)
-
-
-
+    except Exception as e:
+        st.error(f"Something went wrong: {e}")
