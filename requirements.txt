@@ -1,6 +1,4 @@
-streamlit 
-langchain-openai 
-langchain-groq 
-langchain-google-genai 
-langchain-core
-
+streamlit
+langchain
+python-dotenv
+faiss-cpu
