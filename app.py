@@ -3,7 +3,7 @@ import streamlit as st
 import config
 settings = config.settings
 from models.llm import get_chat_model
-from models.embeddings import get_embeddings_client
+from models.embeddings import get_embeddings
 from utils.rag import build_faiss_index_from_texts, retrieve_from_index
 
 from utils.web_search import serpapi_search
@@ -165,5 +165,6 @@ with status_col:
     st.markdown("Environment")
     st.text(f"Provider: {settings.PROVIDER}")
     st.text(f"LLM model: {settings.LLM_MODEL}")
+
 
 
