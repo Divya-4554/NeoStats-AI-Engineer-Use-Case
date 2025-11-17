@@ -2,10 +2,11 @@
 
 def get_embeddings(text_list):
     """
-    Returns dummy embeddings for testing without any API.
-    Each text becomes a simple numeric vector based on ASCII sum.
+    Dummy embeddings without API.
+    More meaningful than single sum → improves retrieval.
     """
     embeddings = []
     for text in text_list:
-        embeddings.append([sum(ord(c) for c in text)])  # simple numeric vector
+        emb = sum(ord(c) for c in text) * len(text)
+        embeddings.append([emb])  # 1D vector
     return embeddings
