@@ -12,7 +12,7 @@ docs = [
     "RAG integrates local documents with LLMs to provide contextual answers."
 ]
 
-# Compute dummy embeddings once
+# Precompute dummy embeddings
 doc_embeddings = get_embeddings(docs)
 
 # UI
@@ -20,37 +20,49 @@ mode = st.radio("Response Mode", ["Concise", "Detailed"])
 query = st.text_input("Enter your question:")
 
 def generate_answer(query, context, mode):
-    """Dummy LLM-style answer (no API needed)."""
+    """
+    Clean Answer Generator — NO API required.
+    """
+
+    # 1. Handle greetings / casual messages
+    smalltalk = ["hi", "hello", "hey", "hii", "yo", "hola"]
+    if query.lower().strip() in smalltalk:
+        return "Hi! How can I help you today? 😊"
+
+    # 2. If nothing found at all
+    if not context or context.strip() == "":
+        return "I couldn't find any relevant information. Please try another question."
+
+    # 3. Concise Mode
     if mode == "Concise":
-        return (
-            f"Short Answer:\n{context[:150]}...\n\n"
-            f"(Concise Mode)"
-        )
-    else:
-        return (
-            f"Detailed Answer\n\n"
-            f"User Query: {query}\n\n"
-            f"Relevant Information:\n{context}\n\n"
-            f"Explanation:\n"
-            f"This answer is generated using a RAG pipeline where retrieved documents "
-            f"or web search results are used as context.\n\n"
-            f"(Detailed Mode)"
-        )
+        return f"{context[:250]}..."
+
+    # 4. Detailed Mode
+    return (
+        f"### Detailed Answer\n"
+        f"**Your Question:** {query}\n\n"
+        f"**Relevant Information Found:**\n{context}\n\n"
+        f"**Explanation:**\n"
+        f"This answer is generated using a simple RAG pipeline. "
+        f"Relevant documents (or fallback web search results) "
+        f"were used to form the final response."
+    )
+
 
 if st.button("Ask"):
     try:
-        # RAG Retrieval
+        # Retrieve top docs using embeddings
         top_docs = retrieve_docs(query, docs, doc_embeddings)
 
         if top_docs:
             context = "\n".join(top_docs)
         else:
-            # Web Search Fallback
+            # If local docs fail → fallback to dummy web search
             web_results = web_search(query)
             context = "\n".join(web_results)
 
-        final_response = generate_answer(query, context, mode)
-        st.write(final_response)
+        final_answer = generate_answer(query, context, mode)
+        st.write(final_answer)
 
     except Exception as e:
         st.error(f"Something went wrong: {e}")
