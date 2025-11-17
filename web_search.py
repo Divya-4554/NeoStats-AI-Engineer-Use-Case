@@ -1,28 +1,19 @@
-# utils/web_search.py
 import requests
-from config.config import settings
 
-SERPAPI_BASE = "https://serpapi.com/search.json"
-
-def serpapi_search(query: str, num_results: int = 3):
-    key = settings.SERPAPI_API_KEY
-    if not key:
-        raise RuntimeError("SERPAPI_API_KEY not set. Add it to .env to enable live web search.")
-    params = {
-        "q": query,
-        "num": num_results,
-        "api_key": key
-    }
+def web_search(query, api_key):
+    """
+    Perform a simple web search and return top results.
+    """
     try:
-        resp = requests.get(SERPAPI_BASE, params=params, timeout=10)
-        resp.raise_for_status()
-        j = resp.json()
+        url = f"https://api.serpapi.com/search.json?q={query}&api_key={api_key}"
+        resp = requests.get(url).json()
         results = []
-        for r in j.get("organic_results", [])[:num_results]:
+        for r in resp.get("organic_results", [])[:3]:
             title = r.get("title")
-            snippet = r.get("snippet") or r.get("snippet_highlighted_words")
+            snippet = r.get("snippet")
             link = r.get("link")
-            results.append({"title": title, "snippet": snippet, "link": link})
+            results.append(f"{title}\n{snippet}\n{link}")
         return results
     except Exception as e:
-        raise RuntimeError(f"SerpAPI search failed: {e}")
+        print(f"Web search error: {e}")
+        return ["No web results found."]
