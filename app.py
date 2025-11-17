@@ -5,7 +5,6 @@ import os
 sys.path.append(os.path.dirname(__file__))  # ensures repo root is in Python path
 
 import streamlit as st
-from models.embeddings import get_embeddings
 from models.rag import run_rag_pipeline
 
 # Streamlit page setup
@@ -24,4 +23,5 @@ if user_question:
         answer = run_rag_pipeline(user_question, chat_model, embeddings_model)
         st.subheader("Answer:")
         st.write(answer)
+
 
