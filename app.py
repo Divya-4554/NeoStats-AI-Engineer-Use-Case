@@ -24,3 +24,4 @@ if user_question:
         answer = run_rag_pipeline(user_question, chat_model, embeddings_model)
         st.subheader("Answer:")
         st.write(answer)
+
