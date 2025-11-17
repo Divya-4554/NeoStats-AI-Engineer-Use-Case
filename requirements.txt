@@ -2,3 +2,6 @@ streamlit
 langchain
 python-dotenv
 faiss-cpu
+
+scikit-learn
+numpy
