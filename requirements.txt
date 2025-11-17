@@ -1,7 +1,10 @@
 
 
+
+
 streamlit
-langchain-openai
+langchain[openai]
+faiss-cpu
 langchain-groq
 langchain-google-genai
 langchain-core
@@ -12,5 +15,6 @@ faiss-cpu
 PyPDF2
 requests
 python-pptx
+
 
 
