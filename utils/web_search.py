@@ -1,19 +1,11 @@
-import requests
+# utils/web_search.py
 
-def web_search(query, api_key):
+def web_search(query, api_key=None):
     """
-    Perform a simple web search and return top results.
+    Mock web search results for testing without API.
     """
-    try:
-        url = f"https://api.serpapi.com/search.json?q={query}&api_key={api_key}"
-        resp = requests.get(url).json()
-        results = []
-        for r in resp.get("organic_results", [])[:3]:
-            title = r.get("title")
-            snippet = r.get("snippet")
-            link = r.get("link")
-            results.append(f"{title}\n{snippet}\n{link}")
-        return results
-    except Exception as e:
-        print(f"Web search error: {e}")
-        return ["No web results found."]
+    return [
+        f"Mock search result 1 for query '{query}'",
+        f"Mock search result 2 for query '{query}'",
+        f"Mock search result 3 for query '{query}'"
+    ]
