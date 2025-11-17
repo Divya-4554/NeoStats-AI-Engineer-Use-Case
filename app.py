@@ -1,46 +1,27 @@
 # app.py
-
 import sys
 import os
-sys.path.insert(0, os.path.dirname(__file__))  # Ensure repo root is in path
+sys.path.insert(0, os.path.dirname(__file__))
 
 import streamlit as st
 from models.llm import get_chat_model
 from models.embeddings import get_embeddings
-from models.rag import run_rag_pipeline
+# from models.rag import run_rag_pipeline   # keep this if you implement RAG
 
 # Streamlit page setup
 st.set_page_config(page_title="NeoStats AI Assistant", layout="wide")
 st.title("NeoStats AI Engineer Assistant")
 st.write("Ask questions about your system/network/data, and the AI assistant will respond.")
 
-# Initialize chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Display previous messages
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-
 # User input
-if prompt := st.chat_input("Enter your question:"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+user_question = st.text_input("Enter your question:")
 
-    # Generate AI response
-    with st.chat_message("assistant"):
-        with st.spinner("Generating answer..."):
-            chat_model = get_chat_model()
-            embeddings_model = get_embeddings()  # fixed alias
-            answer = run_rag_pipeline(prompt, chat_model, embeddings_model)
-            st.markdown(answer)
-            st.session_state.messages.append({"role": "assistant", "content": answer})
-
-# Sidebar to clear chat
-with st.sidebar:
-    st.title("Navigation")
-    if st.button("🗑️ Clear Chat History"):
-        st.session_state.messages = []
-        st.experimental_rerun()
+if user_question:
+    with st.spinner("Generating answer..."):
+        chat_model = get_chat_model()           # LLM model
+        embeddings_model = get_embeddings()     # dummy embeddings
+        # For now, you can just show the embeddings length as a test
+        vector = embeddings_model.embed_documents([user_question])
+        st.subheader("Embeddings vector (dummy):")
+        st.write(vector)
+        # If you implement RAG later, use run_rag_pipeline here
