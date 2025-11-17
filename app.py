@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.dirname(__file__))  # ensure repo root is in Python p
 
 import streamlit as st
 from models.llm import get_chat_model
-from models.embeddings import get_embeddings
+
 from models.rag import run_rag_pipeline
 
 # Initialize models
@@ -77,4 +77,5 @@ if page == "Chat":
         
         # Save bot response
         st.session_state.messages.append({"role": "assistant", "content": response})
+
 
