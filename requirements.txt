@@ -1,20 +1,18 @@
-
-
-
-
+# Core
 streamlit
+python-dotenv
+requests
+
+# LangChain and LLMs
 langchain[openai]
-faiss-cpu
 langchain-groq
 langchain-google-genai
 langchain-core
 langchain-text-splitters
 
-python-dotenv
+# Embeddings and Vector Stores
 faiss-cpu
+
+# PDF & PPT handling
 PyPDF2
-requests
 python-pptx
-
-
-
