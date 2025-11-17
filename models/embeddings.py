@@ -3,7 +3,6 @@
 from config.config import settings
 from typing import List
 
-# Explicit OpenAI import to avoid Streamlit errors
 try:
     from langchain.embeddings.openai import OpenAIEmbeddings
 except Exception:
@@ -21,9 +20,9 @@ def get_embeddings_client():
             openai_api_key=settings.OPENAI_API_KEY
         )
     elif provider == "groq":
-        raise NotImplementedError("Groq embeddings not implemented in this template.")
+        raise NotImplementedError("Groq embeddings not implemented.")
     elif provider in ("google", "gemini"):
-        raise NotImplementedError("Google embeddings not implemented in this template.")
+        raise NotImplementedError("Google embeddings not implemented.")
     else:
         raise RuntimeError(f"Unsupported provider for embeddings: {provider}")
 
@@ -35,3 +34,7 @@ def embed_texts(texts: List[str]) -> List[List[float]]:
         if hasattr(client, "embed"):
             return client.embed(texts)
         raise
+
+# Alias for app.py
+def get_embeddings():
+    return get_embeddings_client()
